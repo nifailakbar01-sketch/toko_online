@@ -82,16 +82,18 @@ export const DashboardPage = () => {
         <Col md={3}>
           <StatCard title="Total Pesanan" value={stats.totalOrders} icon="📦" color="success" />
         </Col>
-        <Col md={3}>
-          <StatCard
-            title="Total Pendapatan"
-            value={`Rp ${stats.totalRevenue?.toLocaleString('id-ID')}`}
-            icon="💰"
-            color="warning"
-          />
-        </Col>
-        {user?.role === 'manager' && (
+        {user?.role !== 'pelanggan' && (
           <Col md={3}>
+            <StatCard
+              title="Total Pendapatan"
+              value={`Rp ${stats.totalRevenue?.toLocaleString('id-ID')}`}
+              icon="💰"
+              color="warning"
+            />
+          </Col>
+        )}
+        {user?.role === 'manager' && (
+          <Col md={user?.role === 'pelanggan' ? 3 : 3}>
             <StatCard title="Menu Manager" value="Aktif" icon="⚙️" color="info" />
           </Col>
         )}
