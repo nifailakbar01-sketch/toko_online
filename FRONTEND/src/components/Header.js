@@ -39,6 +39,12 @@ export const Header = () => {
                     <Nav.Link href="/orders">Pesanan</Nav.Link>
                   </>
                 )}
+                {user.role === 'pelanggan' && (
+                  <>
+                    <Nav.Link href="/books">Buku</Nav.Link>
+                    <Nav.Link href="/orders">Pesanan Saya</Nav.Link>
+                  </>
+                )}
                 <Dropdown>
                   <Dropdown.Toggle variant="success" id="dropdown-basic">
                     {user.fullname}

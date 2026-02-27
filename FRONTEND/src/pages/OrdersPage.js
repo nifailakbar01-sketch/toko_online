@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Button, Modal, Form, Row, Col, Card } from 'react-bootstrap';
 import { Layout, LoadingSpinner, ErrorAlert, SuccessAlert } from '../components/Common';
+import { useAuth } from '../context/AuthContext';
 import apiClient from '../services/api';
 
 export const OrdersPage = () => {
+  const { user } = useAuth();
   const [orders, setOrders] = useState([]);
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +39,7 @@ export const OrdersPage = () => {
       const status = err.response?.status;
       const message = err.response?.data?.message;
       if (status === 403) {
-        setError('❌ Akses ditolak. Anda harus login dengan role "kasir" atau "manager"');
+        setError('❌ Akses ditolak. Silakan login kembali');
       } else if (status === 401) {
         setError('⚠️ Sesi Anda telah berakhir. Silakan login kembali');
       } else {
@@ -216,7 +218,10 @@ export const OrdersPage = () => {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <Layout title="📦 Manajemen Pesanan" subtitle="Kelola semua pesanan buku">
+    <Layout 
+      title={user?.role === 'pelanggan' ? '📦 Pesanan Saya' : '📦 Manajemen Pesanan'} 
+      subtitle={user?.role === 'pelanggan' ? 'Lihat dan kelola pesanan Anda' : 'Kelola semua pesanan buku'}
+    >
       {error && <ErrorAlert message={error} onClose={() => setError('')} />}
       {success && <SuccessAlert message={success} onClose={() => setSuccess('')} />}
 
@@ -230,7 +235,7 @@ export const OrdersPage = () => {
         <thead className="table-dark">
           <tr>
             <th>ID</th>
-            <th>Pelanggan</th>
+            {user?.role !== 'pelanggan' && <th>Pelanggan</th>}
             <th>Tanggal</th>
             <th>Total</th>
             <th>Status</th>
@@ -241,7 +246,7 @@ export const OrdersPage = () => {
           {orders.map((order) => (
             <tr key={order.id}>
               <td>{order.id}</td>
-              <td>{order.customer_name || 'Unknown'}</td>
+              {user?.role !== 'pelanggan' && <td>{order.customer_name || 'Unknown'}</td>}
               <td>{formatDate(order.created_at)}</td>
               <td className="text-end">Rp {order.total_price?.toLocaleString('id-ID')}</td>
               <td>
@@ -420,29 +425,33 @@ export const OrdersPage = () => {
 
             <hr />
 
-            <div>
-              <h6>Ubah Status</h6>
-              <Form.Select
-                defaultValue={selectedOrder.status}
-                onChange={(e) => handleUpdateStatus(selectedOrder.id, e.target.value)}
-              >
-                <option value="pending">Pending</option>
-                <option value="paid">Selesai</option>
-                <option value="cancelled">Dibatalkan</option>
-              </Form.Select>
-            </div>
+            {user?.role !== 'pelanggan' && (
+              <>
+                <div>
+                  <h6>Ubah Status</h6>
+                  <Form.Select
+                    defaultValue={selectedOrder.status}
+                    onChange={(e) => handleUpdateStatus(selectedOrder.id, e.target.value)}
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="paid">Selesai</option>
+                    <option value="cancelled">Dibatalkan</option>
+                  </Form.Select>
+                </div>
 
-            <hr />
+                <hr />
 
-            <div>
-              <Button
-                variant="danger"
-                className="w-100"
-                onClick={() => handleDeleteOrder(selectedOrder.id)}
-              >
-                🗑️ Hapus Pesanan
-              </Button>
-            </div>
+                <div>
+                  <Button
+                    variant="danger"
+                    className="w-100"
+                    onClick={() => handleDeleteOrder(selectedOrder.id)}
+                  >
+                    🗑️ Hapus Pesanan
+                  </Button>
+                </div>
+              </>
+            )}
               </>
             )}
           </Modal.Body>

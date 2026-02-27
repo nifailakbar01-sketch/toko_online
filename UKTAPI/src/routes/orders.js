@@ -9,7 +9,7 @@
  * @swagger
  * /orders:
  *   get:
- *     summary: Mendapatkan semua order
+ *     summary: Mendapatkan semua order atau order milik pelanggan (jika pelanggan)
  *     security:
  *       - bearerAuth: []
  *     tags: [ORDERS]
@@ -44,7 +44,7 @@
  * @swagger
  * /orders:
  *   post:
- *     summary: Membuat order baru
+ *     summary: Membuat order baru (kasir membuat untuk pelanggan atau pelanggan membuat sendiri)
  *     security:
  *       - bearerAuth: []
  *     tags: [ORDERS]
@@ -130,16 +130,34 @@ const pool = require('../db/pool');
 const { verifyToken, requireRoles } = require('../middleware/authorization');
 
 // =======================================================
-// GET semua order (hanya kasir)
+// GET semua order (kasir/manager) atau order milik user (pelanggan)
 // =======================================================
-router.get('/', verifyToken, requireRoles('kasir','manager'), async (req, res) => {
+router.get('/', verifyToken, async (req, res) => {
   try {
-    const result = await pool.query(`
-      SELECT o.*, u.fullname AS customer_name
-      FROM orders o
-      LEFT JOIN users u ON o.id_user = u.id
-      ORDER BY o.id DESC
-    `);
+    let result;
+    
+    // Pelanggan hanya bisa lihat order mereka sendiri
+    if (req.user.role === 'pelanggan') {
+      result = await pool.query(
+        `SELECT o.*, u.fullname AS customer_name
+         FROM orders o
+         LEFT JOIN users u ON o.id_user = u.id
+         WHERE o.id_user = $1
+         ORDER BY o.id DESC`,
+        [req.user.id]
+      );
+    } else if (['kasir', 'manager'].includes(req.user.role)) {
+      // Kasir dan manager bisa lihat semua order
+      result = await pool.query(`
+        SELECT o.*, u.fullname AS customer_name
+        FROM orders o
+        LEFT JOIN users u ON o.id_user = u.id
+        ORDER BY o.id DESC
+      `);
+    } else {
+      return res.status(403).json({ message: 'Akses ditolak.' });
+    }
+    
     res.json(result.rows);
   } catch (err) {
     console.error(err);
@@ -164,9 +182,9 @@ router.get('/my', verifyToken, requireRoles('kasir'), async (req, res) => {
 });
 
 // =======================================================
-// POST buat order baru (hanya kasir)
+// POST buat order baru (kasir atau pelanggan)
 // =======================================================
-router.post('/', verifyToken, requireRoles('kasir'), async (req, res) => {
+router.post('/', verifyToken, requireRoles('kasir', 'pelanggan'), async (req, res) => {
   const { items } = req.body;
 
   try {
@@ -206,15 +224,20 @@ router.post('/', verifyToken, requireRoles('kasir'), async (req, res) => {
 });
 
 // =======================================================
-// GET detail order by ID (hanya kasir)
+// GET detail order by ID (kasir/manager lihat semua, pelanggan lihat milik sendiri)
 // =======================================================
-router.get('/:id', verifyToken, requireRoles('kasir'), async (req, res) => {
+router.get('/:id', verifyToken, async (req, res) => {
   const { id } = req.params;
 
   try {
     const order = await pool.query('SELECT * FROM orders WHERE id=$1', [id]);
     if (order.rows.length === 0) {
       return res.status(404).json({ message: 'Order tidak ditemukan.' });
+    }
+
+    // Pelanggan hanya bisa lihat order mereka sendiri
+    if (req.user.role === 'pelanggan' && order.rows[0].id_user !== req.user.id) {
+      return res.status(403).json({ message: 'Akses ditolak.' });
     }
 
     const items = await pool.query(

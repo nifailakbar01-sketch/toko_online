@@ -98,15 +98,15 @@ Setelah login, Anda akan melihat menu:
 
 ---
 
-## 🔐 Role & Akses
+## 🔐 & Akses
 
-| Role | Akses |
+| | Akses |
 |------|-------|
 | Manager | Semua menu |
 | Kasir | Buku + Pesanan |
 | Pelanggan | Profil + Buku |
 
-Demo user: **role kasir**
+Demo user: **kasir**
 
 ---
 
