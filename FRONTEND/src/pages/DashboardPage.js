@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, Spinner } from 'react-bootstrap';
+import { Row, Col, Card, Spinner, Table, Button } from 'react-bootstrap';
 import { useAuth } from '../context/AuthContext';
 import { Layout } from '../components/Common';
 import apiClient from '../services/api';
@@ -12,6 +12,7 @@ export const DashboardPage = () => {
     totalOrders: 0,
     totalRevenue: 0,
   });
+  const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // ========================================
@@ -62,7 +63,7 @@ export const DashboardPage = () => {
 
   if (loading) {
     return (
-      <Layout title="Dashboard" subtitle="Selamat datang di Dashboard">
+      <Layout title="DASHBOARD" subtitle="Selamat datang di Dashboard">
         <div className="text-center py-5">
           <Spinner animation="border" />
           <p className="mt-3">Memuat dashboard...</p>
@@ -72,7 +73,7 @@ export const DashboardPage = () => {
   }
 
   return (
-    <Layout title="📊 Dashboard" subtitle={`Selamat datang, ${user?.fullname}!`}>
+    <Layout title="📊 DASHBOARD" subtitle={`Selamat datang, ${user?.fullname}!`}>
       {/* Info User */}
       <Card className="mb-4 shadow-sm border-0">
         <Card.Body>
@@ -92,13 +93,13 @@ export const DashboardPage = () => {
       </Card>
 
       {/* Main Content */}
-      <Row className="mb-4">
-        {/* Left Side - Quick Links */}
-        <Col md={3}>
-          {user?.role === 'manager' && (
-            <>
-              {/* Manajemen Buku */}
-              <Card className="mb-2 shadow-sm border-0">
+      {user?.role === 'manager' && (
+        <>
+          {/* Manager Dashboard - Stats Cards */}
+          <Row className="mb-4 g-3">
+            {/* Manajemen Buku */}
+            <Col md={6} lg={4} xl={2.4} className="d-flex">
+              <Card className="shadow-sm border-0 w-100">
                 <Card.Body>
                   <a href="/books" className="text-decoration-none">
                     <h6 className="mb-2 text-primary">📚 Manajemen Buku</h6>
@@ -107,9 +108,11 @@ export const DashboardPage = () => {
                   </a>
                 </Card.Body>
               </Card>
+            </Col>
 
-              {/* Manajemen Kategori */}
-              <Card className="mb-2 shadow-sm border-0">
+            {/* Manajemen Kategori */}
+            <Col md={6} lg={4} xl={2.4} className="d-flex">
+              <Card className="shadow-sm border-0 w-100">
                 <Card.Body>
                   <a href="/categories" className="text-decoration-none">
                     <h6 className="mb-2 text-warning">📂 Manajemen Kategori</h6>
@@ -117,9 +120,11 @@ export const DashboardPage = () => {
                   </a>
                 </Card.Body>
               </Card>
+            </Col>
 
-              {/* Manajemen Pengguna */}
-              <Card className="mb-3 shadow-sm border-0">
+            {/* Manajemen Pengguna */}
+            <Col md={6} lg={4} xl={2.4} className="d-flex">
+              <Card className="shadow-sm border-0 w-100">
                 <Card.Body>
                   <a href="/users" className="text-decoration-none">
                     <h6 className="mb-2 text-info">👥 Manajemen Pengguna</h6>
@@ -127,9 +132,11 @@ export const DashboardPage = () => {
                   </a>
                 </Card.Body>
               </Card>
+            </Col>
 
-              {/* Laporan Pesanan */}
-              <Card className="mb-2 shadow-sm border-0">
+            {/* Laporan Pesanan */}
+            <Col md={6} lg={4} xl={2.4} className="d-flex">
+              <Card className="shadow-sm border-0 w-100">
                 <Card.Body>
                   <a href="/orders" className="text-decoration-none">
                     <h6 className="mb-2 text-success">📊 Laporan Pesanan</h6>
@@ -138,9 +145,11 @@ export const DashboardPage = () => {
                   </a>
                 </Card.Body>
               </Card>
+            </Col>
 
-              {/* Total Pendapatan */}
-              <Card className="mb-3 shadow-sm border-0">
+            {/* Total Pendapatan */}
+            <Col md={6} lg={4} xl={2.4} className="d-flex">
+              <Card className="shadow-sm border-0 w-100">
                 <Card.Body>
                   <div>
                     <h6 className="mb-2 text-warning">💰 Total Pendapatan</h6>
@@ -148,12 +157,18 @@ export const DashboardPage = () => {
                   </div>
                 </Card.Body>
               </Card>
-            </>
-          )}
-          {user?.role === 'kasir' && (
-            <>
-              {/* Daftar Buku */}
-              <Card className="mb-3 shadow-sm border-0">
+            </Col>
+          </Row>
+        </>
+      )}
+
+      {/* Kasir Dashboard */}
+      {user?.role === 'kasir' && (
+        <>
+          <Row className="mb-4 g-3">
+            {/* Daftar Buku */}
+            <Col md={6} lg={4} xl={3} className="d-flex">
+              <Card className="shadow-sm border-0 w-100">
                 <Card.Body>
                   <a href="/books" className="text-decoration-none">
                     <h6 className="mb-2 text-primary">📚 Daftar Buku</h6>
@@ -161,9 +176,11 @@ export const DashboardPage = () => {
                   </a>
                 </Card.Body>
               </Card>
+            </Col>
 
-              {/* Kelola Pesanan */}
-              <Card className="mb-2 shadow-sm border-0">
+            {/* Kelola Pesanan */}
+            <Col md={6} lg={4} xl={3} className="d-flex">
+              <Card className="shadow-sm border-0 w-100">
                 <Card.Body>
                   <a href="/orders" className="text-decoration-none">
                     <h6 className="mb-2 text-success">📦 Kelola Pesanan</h6>
@@ -171,9 +188,11 @@ export const DashboardPage = () => {
                   </a>
                 </Card.Body>
               </Card>
+            </Col>
 
-              {/* Total Pendapatan */}
-              <Card className="mb-3 shadow-sm border-0">
+            {/* Total Pendapatan */}
+            <Col md={6} lg={4} xl={3} className="d-flex">
+              <Card className="shadow-sm border-0 w-100">
                 <Card.Body>
                   <div>
                     <h6 className="mb-2 text-warning">💰 Total Pendapatan</h6>
@@ -181,12 +200,18 @@ export const DashboardPage = () => {
                   </div>
                 </Card.Body>
               </Card>
-            </>
-          )}
-          {user?.role === 'pelanggan' && (
-            <>
-              {/* Daftar Buku */}
-              <Card className="mb-3 shadow-sm border-0">
+            </Col>
+          </Row>
+        </>
+      )}
+
+      {/* Pelanggan Dashboard */}
+      {user?.role === 'pelanggan' && (
+        <>
+          <Row className="mb-4 g-3">
+            {/* Daftar Buku */}
+            <Col md={6} lg={4} xl={6} className="d-flex">
+              <Card className="shadow-sm border-0 w-100">
                 <Card.Body>
                   <a href="/books" className="text-decoration-none">
                     <h6 className="mb-2 text-primary">📚 Daftar Buku</h6>
@@ -194,9 +219,11 @@ export const DashboardPage = () => {
                   </a>
                 </Card.Body>
               </Card>
+            </Col>
 
-              {/* Pesanan Saya */}
-              <Card className="mb-3 shadow-sm border-0">
+            {/* Pesanan Saya */}
+            <Col md={6} lg={4} xl={6} className="d-flex">
+              <Card className="shadow-sm border-0 w-100">
                 <Card.Body>
                   <a href="/orders" className="text-decoration-none">
                     <h6 className="mb-2 text-success">📦 Pesanan Saya</h6>
@@ -204,22 +231,10 @@ export const DashboardPage = () => {
                   </a>
                 </Card.Body>
               </Card>
-            </>
-          )}
-        </Col>
-
-        {/* Right Side - Statistics Cards */}
-        <Col md={9}>
-          <Row>
-            <Col md={6} className="mb-3">
-              <StatCard title="📚 Total Buku" value={stats.totalBooks} icon="📚" color="primary" />
-            </Col>
-            <Col md={6} className="mb-3">
-              <StatCard title="📦 Total Pesanan" value={stats.totalOrders} icon="📦" color="success" />
             </Col>
           </Row>
-        </Col>
-      </Row>
+        </>
+      )}
     </Layout>
   );
 };

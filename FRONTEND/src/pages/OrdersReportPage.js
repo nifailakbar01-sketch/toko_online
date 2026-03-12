@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Button, Form, Row, Col, Card, Badge, Modal } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import { Layout, LoadingSpinner, ErrorAlert, SuccessAlert } from '../components/Common';
 import apiClient from '../services/api';
 
 export const OrdersReportPage = () => {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -153,6 +155,12 @@ export const OrdersReportPage = () => {
 
         {error && <ErrorAlert message={error} onClose={() => setError('')} />}
         {success && <SuccessAlert message={success} onClose={() => setSuccess('')} />}
+
+        <Row className="mb-3">
+          <Col>
+            <Button variant="secondary" onClick={() => navigate(-1)}>← Kembali</Button>
+          </Col>
+        </Row>
 
         {/* ========================================
         // STATISTIK CARDS

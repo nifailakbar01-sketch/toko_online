@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Button, Modal, Form, Row, Col, Card } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import { Layout, LoadingSpinner, ErrorAlert, SuccessAlert } from '../components/Common';
 import { useAuth } from '../context/AuthContext';
 import apiClient from '../services/api';
 
 export const OrdersPage = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [orders, setOrders] = useState([]);
   const [books, setBooks] = useState([]);
@@ -225,6 +227,12 @@ export const OrdersPage = () => {
       {error && <ErrorAlert message={error} onClose={() => setError('')} />}
       {success && <SuccessAlert message={success} onClose={() => setSuccess('')} />}
 
+      <Row className="mb-3">
+        <Col>
+          <Button variant="secondary" onClick={() => navigate(-1)}>← Kembali</Button>
+        </Col>
+      </Row>
+
       <div className="mb-4">
         <Button variant="success" onClick={() => setShowModal(true)}>
           + Buat Pesanan Baru
@@ -232,7 +240,7 @@ export const OrdersPage = () => {
       </div>
 
       <Table striped bordered hover responsive>
-        <thead className="table-dark">
+        <thead>
           <tr>
             <th>ID</th>
             {user?.role !== 'pelanggan' && <th>Pelanggan</th>}

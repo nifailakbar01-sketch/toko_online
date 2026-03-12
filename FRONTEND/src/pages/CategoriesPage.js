@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form, Alert } from 'react-bootstrap';
+import { Table, Button, Modal, Form, Alert, Row, Col } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import { Layout, LoadingSpinner, ErrorAlert, SuccessAlert } from '../components/Common';
 import { useAuth } from '../context/AuthContext';
 import apiClient from '../services/api';
 
 export const CategoriesPage = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -87,6 +89,12 @@ export const CategoriesPage = () => {
       {error && <ErrorAlert message={error} onClose={() => setError('')} />}
       {success && <SuccessAlert message={success} onClose={() => setSuccess('')} />}
 
+      <Row className="mb-3">
+        <Col>
+          <Button variant="secondary" onClick={() => navigate(-1)}>← Kembali</Button>
+        </Col>
+      </Row>
+
       <div className="mb-4">
         <Button variant="success" onClick={() => handleShowModal()}>
           + Tambah Kategori Baru
@@ -94,7 +102,7 @@ export const CategoriesPage = () => {
       </div>
 
       <Table striped bordered hover>
-        <thead className="table-dark">
+        <thead>
           <tr>
             <th>ID</th>
             <th>Nama Kategori</th>

@@ -121,7 +121,7 @@ export const LoginPage = () => {
 
               <hr />
               <p className="text-center text-muted small">
-                Demo: user / 12345
+
               </p>
             </Tab>
 

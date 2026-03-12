@@ -188,7 +188,7 @@ router.post('/', verifyToken, requireRoles('manager'), async (req, res) => {
 // ==================================================
 // ✅ PUT ubah status aktif/nonaktif user (khusus manager)
 // ==================================================
-router.put('/deactivate-user/:id', verifyToken, requireRoles('manager'), async (req, res) => {
+router.put('/:id', verifyToken, requireRoles('manager'), async (req, res) => {
   try {
     const { id } = req.params;
     const { is_active } = req.body; // ambil dari body, bukan params

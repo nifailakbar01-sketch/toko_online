@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form } from 'react-bootstrap';
+import { Table, Button, Modal, Form, Row, Col } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import { Layout, LoadingSpinner, ErrorAlert, SuccessAlert } from '../components/Common';
+import { useAuth } from '../context/AuthContext';
 import apiClient from '../services/api';
 
 export const UsersPage = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -97,6 +101,12 @@ export const UsersPage = () => {
       {error && <ErrorAlert message={error} onClose={() => setError('')} />}
       {success && <SuccessAlert message={success} onClose={() => setSuccess('')} />}
 
+      <Row className="mb-3">
+        <Col>
+          <Button variant="secondary" onClick={() => navigate(-1)}>← Kembali</Button>
+        </Col>
+      </Row>
+
       <div className="mb-4">
         <Button variant="success" onClick={() => setShowModal(true)}>
           + Tambah Pengguna Baru
@@ -104,7 +114,7 @@ export const UsersPage = () => {
       </div>
 
       <Table striped bordered hover responsive>
-        <thead className="table-dark">
+        <thead>
           <tr>
             <th>ID</th>
             <th>Nama Lengkap</th>

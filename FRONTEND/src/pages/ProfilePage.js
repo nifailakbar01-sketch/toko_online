@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Card, Row, Col, Button } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export const ProfilePage = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
 
   if (!user) {
@@ -12,6 +14,12 @@ export const ProfilePage = () => {
   return (
     <Container className="py-4">
       <h1 className="mb-4">👤 Profil Saya</h1>
+
+      <Row className="mb-3">
+        <Col>
+          <Button variant="secondary" onClick={() => navigate(-1)}>← Kembali</Button>
+        </Col>
+      </Row>
 
       <Row>
         <Col md={6}>

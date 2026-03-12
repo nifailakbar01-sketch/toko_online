@@ -150,6 +150,8 @@ router.get('/', verifyToken, async (req, res) => {
         b.price,
         b.stock,
         b.is_available,
+        b.image_url,
+        b.description,
         b.last_modified_by
       FROM books b
       LEFT JOIN categories c ON b.category_id = c.id
@@ -178,6 +180,8 @@ router.get('/:id', verifyToken, async (req, res) => {
         b.price,
         b.stock,
         b.is_available,
+        b.image_url,
+        b.description,
         b.last_modified_by
       FROM books b
       LEFT JOIN categories c ON b.category_id = c.id
@@ -199,16 +203,16 @@ router.get('/:id', verifyToken, async (req, res) => {
 // POST tambah buku (hanya manager/admin)
 // =======================================================
 router.post('/', verifyToken, requireRoles('manager'), async (req, res) => {
-  const { title, author, category_id, price, stock, is_available } = req.body;
+  const { title, author, category_id, price, stock, is_available, image_url, description } = req.body;
 
   try {
     // Masukkan ke tabel books
     const insertResult = await pool.query(
       `INSERT INTO books 
-        (title, author, category_id, price, stock, is_available, last_modified_by)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+        (title, author, category_id, price, stock, is_available, image_url, description, last_modified_by)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING *`,
-      [title, author, category_id, price, stock, is_available, req.user.id]
+      [title, author, category_id, price, stock, is_available, image_url, description, req.user.id]
     );
 
     // Ambil data dengan JOIN kategori
@@ -222,6 +226,8 @@ router.post('/', verifyToken, requireRoles('manager'), async (req, res) => {
         b.price,
         b.stock,
         b.is_available,
+        b.image_url,
+        b.description,
         b.last_modified_by
       FROM books b
       LEFT JOIN categories c ON b.category_id = c.id
@@ -243,16 +249,23 @@ router.post('/', verifyToken, requireRoles('manager'), async (req, res) => {
 // =======================================================
 router.put('/:id', verifyToken, requireRoles('manager'), async (req, res) => {
   const { id } = req.params;
-  const { title, author, category_id, price, stock, is_available } = req.body;
+  const { title, author, category_id, price, stock, is_available, image_url, description } = req.body;
 
   try {
     const result = await pool.query(
-      `UPDATE books 
-       SET title = $1, author = $2, category_id = $3, price = $4, stock = $5, 
-           is_available = $6, last_modified_by = $7
-       WHERE id = $8
-       RETURNING *`,
-      [title, author, category_id, price, stock, is_available, req.user.id, id]
+      `UPDATE books SET
+        title = COALESCE($1, title),
+        author = COALESCE($2, author),
+        category_id = COALESCE($3, category_id),
+        price = COALESCE($4, price),
+        stock = COALESCE($5, stock),
+        is_available = COALESCE($6, is_available),
+        image_url = COALESCE($7, image_url),
+        description = COALESCE($8, description),
+        last_modified_by = $9
+      WHERE id = $10
+      RETURNING *`,
+      [title, author, category_id, price, stock, is_available, image_url, description, req.user.id, id]
     );
 
     if (result.rows.length === 0) {

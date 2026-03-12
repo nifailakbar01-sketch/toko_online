@@ -1,0 +1,608 @@
+/* ========================================
+   CUSTOM THEME - Toko Buku Online
+   
+   📖 DOKUMENTASI LENGKAP: Lihat file COLOR_GUIDE.md di root FRONTEND folder
+      untuk panduan detil tentang penggunaan warna, kombinasi, dan best practices.
+   
+   FILOSOFI DESAIN:
+   Tema profesional modern untuk aplikasi manajemen toko buku dengan:
+   - Color palette yang konsisten & accessible
+   - Typography yang jelas & mudah dibaca
+   - Spacing & layout yang teratur
+   - Interactive states yang responsif
+   
+   STRUKTUR:
+   1. Color Variables - Variabel warna utama
+   2. Body & General Styles - Styling dasar halaman
+   3. Navbar - Top navigation bar
+   4. Card - Container untuk konten
+   5. Button - Tombol dengan berbagai variants
+   6. Table - Data tables styling
+   7. Badge - Status labels
+   8. Form - Input fields & controls
+   9. Alert - Message notifications
+   10. Modal - Dialog windows
+   11. Pagination - Page navigation
+   
+   HOW TO USE:
+   - Gunakan CSS variables (--primary, --success, dll) untuk konsistensi
+   - Follow naming conventions yang sudah ada
+   - Selalu tambahkan comments untuk kode kompleks
+   - Jangan hardcode hex values - selalu gunakan variables
+   ======================================== */
+
+/* ========================================
+   COLOR VARIABLES - PROFESSIONAL BOOKSTORE THEME
+   ======================================== */
+:root {
+  /* PRIMARY COLORS - Modern Blue (#2563eb)
+     Digunakan untuk: Navbar, Header utama, CTA buttons, Links
+     Alasan: Biru elegan mencerminkan kepercayaan & profesionalisme
+     - Warna standar untuk brand identity yang kuat
+  */
+  --primary: #2563eb;
+  --primary-light: #dbeafe;  /* Untuk background highlight, hover states */
+  --primary-dark: #1e40af;   /* Untuk active states, borders */
+
+  /* SECONDARY COLORS - Fresh Teal/Green (#059669)
+     Digunakan untuk: Success alerts, Approve buttons, Positive actions
+     Alasan: Hijau menenangkan menunjukkan kesuksesan & keamanan
+     - Gunakan untuk: Tombol "Tambah", "Simpan", confirmation dialogs
+  */
+  --success: #059669;
+  --success-light: #d1fae5;  /* Background untuk success messages */
+  --success-dark: #047857;   /* Border & text pada success states */
+
+  /* ACCENT COLORS - Warm Amber (#d97706)
+     Digunakan untuk: Warnings, Alerts, Important notices
+     Alasan: Amber hangat menarik perhatian tanpa terasa agresif
+     - Gunakan untuk: Warning badges, pending status, attention-needed items
+  */
+  --warning: #d97706;
+  --warning-light: #fef3c7;  /* Background untuk warning messages */
+  --warning-dark: #b45309;   /* Border & text pada warning states */
+
+  /* INFO COLORS - Sky Blue (#0284c7)
+     Digunakan untuk: Info icons, Info alerts, Secondary information
+     Alasan: Biru cerah membedakan dari primary, informatif tapi tidak dominan
+     - Gunakan untuk: Info badges, helper text, informational alerts
+  */
+  --info: #0284c7;
+  --info-light: #e0f2fe;     /* Background untuk info messages */
+  --info-dark: #0c4a6e;      /* Border & text pada info states */
+
+  /* DANGER COLOR - Bright Red (#dc2626)
+     Digunakan untuk: Delete buttons, Error alerts, Critical actions
+     Alasan: Merah standart untuk menunjukkan danger/risk
+     - Gunakan hati-hati, hanya untuk destructive actions
+  */
+  --danger: #dc2626;
+
+  /* NEUTRAL COLORS - Professional Grays
+     Digunakan untuk: Text, backgrounds, borders, muted content
+     Alasan: Palet netral profesional memastikan readability optimal
+  */
+  --light: #f9fafb;          /* Sangat ringan, hampir putih - untuk subtle backgrounds */
+  --dark: #1f2937;           /* Sangat gelap - untuk body text & headers */
+  --muted: #6b7280;          /* Medium gray - untuk secondary text & placeholders */
+  --white: #ffffff;          /* Putih murni - untuk card backgrounds & contrast */
+
+  /* BACKGROUND COLORS
+     Digunakan untuk: Page background, Container backgrounds
+     Alasan: Warna netral yang nyaman untuk mata, tidak mencolok
+  */
+  --bg-light: #f3f4f6;       /* Light gray - page background utama */
+  --bg-white: #ffffff;       /* Putih - card dan container backgrounds */
+}
+
+/* ========================================
+   BODY & GENERAL STYLES
+   PENJELASAN: Pengaturan dasar untuk seluruh body/page
+   - Background: Light gray (#f3f4f6) membuat mata nyaman saat membaca lama
+   - Text color: Dark gray (#1f2937) untuk kontras bagus & readability tinggi
+   ======================================== */
+body {
+  background-color: var(--bg-light);
+  color: var(--dark);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+}
+
+/* ========================================
+   NAVBAR CUSTOMIZATION
+   PENJELASAN: Navigation bar di bagian atas aplikasi
+   - Gradient biru (primary → darker primary) menciptakan visual depth
+   - Box shadow subtle memisahkan navbar dari konten di bawah
+   - Tampilan modern & profesional, brand identity yang kuat
+   ======================================== */
+.navbar {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%) !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+}
+
+.navbar-brand {
+  font-weight: 700 !important;
+  font-size: 1.5rem !important;
+  color: var(--white) !important;
+}
+
+.nav-link {
+  color: rgba(255, 255, 255, 0.8) !important;
+  transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+  color: var(--white) !important;
+}
+
+/* ========================================
+   CARD CUSTOMIZATION
+   PENJELASAN: Komponen card untuk menampilkan informasi
+   - Border: none - tampilan lebih bersih, modern
+   - Border-radius: 8px - sudut membulat, terlihat lembut & modern
+   - Hover shadow: Menambah depth, interaksi visual yang menarik
+   - Card header: Primary blue background, white text untuk contrast maksimal
+   ======================================== */
+.card {
+  border: none !important;
+  border-radius: 8px !important;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.card-header {
+  background-color: var(--primary) !important;
+  color: var(--white) !important;
+  border-radius: 8px 8px 0 0 !important;
+  border-bottom: none !important;
+}
+
+/* ========================================
+   BUTTON CUSTOMIZATION
+   PENJELASAN: Styling untuk semua tombol (buttons)
+   - .btn-primary: Tombol utama, CTA (blue) - gunakan untuk aksi penting
+   - .btn-success: Tombol approve/simpan (green) - gunakan untuk positive actions
+   - .btn-warning: Tombol warning (amber) - gunakan untuk perhatian
+   - .btn-danger: Tombol delete/cancel (red) - gunakan untuk destructive actions
+   - Border-radius: 6px, padding: 0.6rem 1.2rem - modern, nyaman untuk klik
+   ======================================== */
+.btn {
+  border-radius: 6px !important;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background-color: var(--primary) !important;
+  border-color: var(--primary) !important;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-dark) !important;
+  border-color: var(--primary-dark) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
+}
+
+.btn-success {
+  background-color: var(--success) !important;
+  border-color: var(--success) !important;
+}
+
+.btn-success:hover {
+  background-color: var(--success-dark) !important;
+  border-color: var(--success-dark) !important;
+}
+
+.btn-warning {
+  background-color: var(--warning) !important;
+  border-color: var(--warning) !important;
+  color: var(--dark) !important;
+}
+
+.btn-warning:hover {
+  background-color: var(--warning-dark) !important;
+  border-color: var(--warning-dark) !important;
+}
+
+.btn-danger {
+  background-color: var(--danger) !important;
+  border-color: var(--danger) !important;
+}
+
+.btn-danger:hover {
+  background-color: #bb2d3b !important;
+  border-color: #bb2d3b !important;
+}
+
+/* ========================================
+   BADGE CUSTOMIZATION
+   PENJELASAN: Komponen badge untuk status/label kecil
+   - Padding: 0.5rem 0.75rem - cukup untuk readability namun compact
+   - Font-weight: 500 - terlihat penting tapi tidak terlalu bold
+   - Border-radius: 4px - subtle, modern look
+   - Gunakan untuk: Status order, Role user, Category labels, dll
+   ======================================== */
+.badge {
+  padding: 0.5rem 0.75rem !important;
+  font-weight: 500;
+  border-radius: 4px !important;
+}
+
+.bg-primary {
+  background-color: var(--primary) !important;
+}
+
+.bg-success {
+  background-color: var(--success) !important;
+}
+
+.bg-warning {
+  background-color: var(--warning) !important;
+}
+
+.bg-info {
+  background-color: var(--info) !important;
+}
+
+.bg-danger {
+  background-color: var(--danger) !important;
+}
+
+/* ========================================
+   TABLE CUSTOMIZATION
+   PENJELASAN: Styling untuk data tables (daftar buku, order, users, dll)
+   - Header: Light background (#f9fafb) + primary blue border - mudah dilihat
+   - Rows: Hover effect dengan light background - interaksi visual
+   - Padding: Cukup untuk readability, tidak terlalu crowded
+   - Striped & bordered: Membantu membedakan baris & kolom dengan jelas
+   ======================================== */
+.table {
+  border-collapse: collapse;
+}
+
+.table thead {
+  background-color: var(--light);
+  border-bottom: 2px solid var(--primary);
+}
+
+.table thead th {
+  color: var(--dark);
+  font-weight: 600;
+  padding: 1rem;
+  border: none;
+}
+
+.table tbody tr {
+  border-bottom: 1px solid #dee2e6;
+}
+
+.table tbody tr:hover {
+  background-color: var(--light);
+}
+
+.table tbody td {
+  padding: 0.75rem 1rem;
+  vertical-align: middle;
+}
+
+/* ========================================
+   FORM CUSTOMIZATION
+   PENJELASAN: Styling untuk input forms (text, select, textarea)
+   - Border: Light gray (#dee2e6) - subtle tapi terlihat
+   - Border-radius: 6px - modern, rounded corners
+   - Focus state: Primary blue border + subtle shadow - mendapat attention
+   - Transition: Smooth color & shadow changes untuk UX yang baik
+   - Font-weight label: 500 - cukup bold untuk dibedakan dari placeholder
+   ======================================== */
+.form-control {
+  border: 1px solid #dee2e6 !important;
+  border-radius: 6px !important;
+  padding: 0.5rem 0.75rem !important;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25) !important;
+}
+
+.form-select {
+  border: 1px solid #dee2e6 !important;
+  border-radius: 6px !important;
+  padding: 0.5rem 0.75rem !important;
+}
+
+.form-select:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25) !important;
+}
+
+.form-label {
+  font-weight: 500;
+  color: var(--dark);
+  margin-bottom: 0.5rem;
+}
+
+/* ========================================
+   ALERT CUSTOMIZATION
+   PENJELASAN: Styling untuk alert messages (error, success, info, warning)
+   - Background: Warna light dari setiap tipe (primary-light, success-light, dll)
+   - Text: Warna dark dari setiap tipe untuk contrast bagus
+   - Border-left: 4px colored border untuk identifikasi quick & visual hierarchy
+   - Alert-primary: Info messages (biru)
+   - Alert-success: Success messages (hijau)
+   - Alert-warning: Warning messages (amber)
+   - Alert-danger: Error messages (merah)
+   ======================================== */
+.alert {
+  border: none !important;
+  border-radius: 6px !important;
+  padding: 1rem 1.25rem !important;
+}
+
+.alert-primary {
+  background-color: var(--primary-light) !important;
+  color: var(--primary-dark) !important;
+  border-left: 4px solid var(--primary) !important;
+}
+
+.alert-success {
+  background-color: var(--success-light) !important;
+  color: var(--success-dark) !important;
+  border-left: 4px solid var(--success) !important;
+}
+
+.alert-warning {
+  background-color: var(--warning-light) !important;
+  color: var(--dark) !important;
+  border-left: 4px solid var(--warning) !important;
+}
+
+.alert-danger {
+  background-color: #f8d7da !important;
+  color: #721c24 !important;
+  border-left: 4px solid var(--danger) !important;
+}
+
+.alert-info {
+  background-color: var(--info-light) !important;
+  color: var(--info-dark) !important;
+  border-left: 4px solid var(--info) !important;
+}
+
+/* ========================================
+   TEXT COLORS
+   ======================================== */
+.text-primary {
+  color: var(--primary) !important;
+}
+
+.text-success {
+  color: var(--success) !important;
+}
+
+.text-warning {
+  color: var(--warning) !important;
+}
+
+.text-info {
+  color: var(--info) !important;
+}
+
+.text-danger {
+  color: var(--danger) !important;
+}
+
+.text-muted {
+  color: var(--muted) !important;
+}
+
+/* ========================================
+   MODAL CUSTOMIZATION
+   PENJELASAN: Dialog windows untuk forms, confirmations, detail views
+   - Modal-header: Primary blue background - konsisten dengan navbar & headers
+   - Btn-close: White X button - kontras baik di blue background
+   - Modal-footer: Subtle border-top - pemisah visual button area
+   - Gunakan untuk: Tambah/Edit forms, delete confirmations, detail views
+   ======================================== */
+.modal-header {
+  background-color: var(--primary) !important;
+  color: var(--white) !important;
+  border-bottom: none !important;
+}
+
+.modal-header .btn-close {
+  filter: brightness(0) invert(1);
+}
+
+.modal-footer {
+  border-top: 1px solid #dee2e6 !important;
+  padding: 1rem !important;
+}
+
+/* ========================================
+   SPINNER CUSTOMIZATION
+   PENJELASAN: Loading indicator/spinner
+   - Color: Primary blue - konsisten dengan brand
+   - Gunakan untuk: Loading states pada data fetching, form submission
+   ======================================== */
+.spinner-border {
+  color: var(--primary) !important;
+}
+
+/* ========================================
+   PAGINATION CUSTOMIZATION
+   PENJELASAN: Page navigation untuk data lists yang panjang
+   - Default: Primary blue text, light gray border
+   - Hover: Terbalik - white text di blue background (interactive)
+   - Active: Same sebagai hover - menunjukkan halaman sekarang
+   - Gunakan untuk: Tabel atau list yang banyak items
+   ======================================== */
+.pagination .page-link {
+  color: var(--primary) !important;
+  border: 1px solid #dee2e6 !important;
+}
+
+.pagination .page-link:hover {
+  color: var(--white) !important;
+  background-color: var(--primary) !important;
+  border-color: var(--primary) !important;
+}
+
+.pagination .page-item.active .page-link {
+  background-color: var(--primary) !important;
+  border-color: var(--primary) !important;
+}
+
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+.shadow-sm {
+  box-shadow: 0 0.125rem 0.25rem rgba(119, 228, 243, 0.918) !important;
+}
+
+.shadow {
+  box-shadow: 0 0.5rem 1rem rgb(119, 184, 228) !important;
+}
+
+.shadow-lg {
+  box-shadow: 0 1rem 3rem rgb(119, 218, 243) !important;
+}
+
+.rounded {
+  border-radius: 0.375rem !important;
+}
+
+.rounded-lg {
+  border-radius: 0.5rem !important;
+}
+
+/* ========================================
+   CUSTOM COMPONENTS
+   ======================================== */
+
+/* Active Tab Style */
+.nav-tabs .nav-link {
+  color: var(--muted) !important;
+  border: none !important;
+}
+
+.nav-tabs .nav-link.active {
+  color: var(--primary) !important;
+  background-color: transparent !important;
+  border-bottom: 2px solid var(--primary) !important;
+}
+
+/* ========================================
+   BOOK CARD HOVER EFFECT
+   PENJELASAN: Card untuk menampilkan buku dengan gambar
+   - Smooth transition saat hover
+   - Shadow meningkat untuk depth effect
+   - Slight scale up untuk interactive feedback
+   ======================================== */
+.hover-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+.hover-card:hover {
+  transform: translateY(-8px) !important;
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.2) !important;
+}
+
+/* Cursor Pointer */
+.cursor-pointer {
+  cursor: pointer !important;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(119, 235, 225, 0.993);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* ========================================
+   RESPONSIVE ADJUSTMENTS
+   ======================================== */
+@media (max-width: 768px) {
+  .card {
+    margin-bottom: 1rem !important;
+  }
+
+  .container {
+    padding: 0.5rem !important;
+  }
+
+  .table {
+    font-size: 0.875rem;
+  }
+
+  .btn {
+    padding: 0.375rem 0.75rem !important;
+    font-size: 0.875rem;
+  }
+}
+
+/* ========================================
+   ANIMATION
+   ======================================== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+.slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* ========================================
+   SCROLLBAR CUSTOMIZATION
+   ======================================== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--light);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
