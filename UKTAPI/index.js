@@ -8,7 +8,7 @@ const app = express();
 // ============================
 // 🔧 Middleware Global
 // ============================
-app.use(express.json()); // Supaya bisa baca JSON dari request body
+app.use(express.json({ limit: '50mb' })); // Supaya bisa baca JSON dari request body (tingkatkan limit untuk base64 image)
 app.use(cors());         // Mengizinkan akses dari frontend (React, Vue, dsb.)
 
 // ============================

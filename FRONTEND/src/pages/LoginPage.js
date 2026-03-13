@@ -80,7 +80,7 @@ export const LoginPage = () => {
     <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
       <Card style={{ width: '100%', maxWidth: '450px' }}>
         <Card.Body>
-          <h2 className="text-center mb-4">📚 Toko Buku</h2>
+          <h2 className="text-center mb-4">📚 AING BOOK STORE</h2>
 
           <Tabs
             activeKey={activeTab}

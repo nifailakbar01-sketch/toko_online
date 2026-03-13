@@ -107,11 +107,13 @@ export const UsersPage = () => {
         </Col>
       </Row>
 
-      <div className="mb-4">
-        <Button variant="success" onClick={() => setShowModal(true)}>
-          + Tambah Pengguna Baru
-        </Button>
-      </div>
+      {user?.role === 'manager' && (
+        <div className="mb-4">
+          <Button variant="success" onClick={() => setShowModal(true)}>
+            + Tambah Pengguna Baru
+          </Button>
+        </div>
+      )}
 
       <Table striped bordered hover responsive>
         <thead>
@@ -141,17 +143,21 @@ export const UsersPage = () => {
                 </span>
               </td>
               <td>
-                <Button
-                  size="sm"
-                  variant={u.is_active ? 'warning' : 'success'}
-                  onClick={() => handleToggleActive(u.id, u.is_active)}
-                  className="me-2"
-                >
-                  {u.is_active ? 'Nonaktifkan' : 'Aktifkan'}
-                </Button>
-                <Button size="sm" variant="danger" onClick={() => handleDelete(u.id)}>
-                  Hapus
-                </Button>
+                {user?.role === 'manager' && (
+                  <>
+                    <Button
+                      size="sm"
+                      variant={u.is_active ? 'warning' : 'success'}
+                      onClick={() => handleToggleActive(u.id, u.is_active)}
+                      className="me-2"
+                    >
+                      {u.is_active ? 'Nonaktifkan' : 'Aktifkan'}
+                    </Button>
+                    <Button size="sm" variant="danger" onClick={() => handleDelete(u.id)}>
+                      Hapus
+                    </Button>
+                  </>
+                )}
               </td>
             </tr>
           ))}

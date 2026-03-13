@@ -5,21 +5,77 @@ import { Layout, LoadingSpinner, ErrorAlert, SuccessAlert } from '../components/
 import { useAuth } from '../context/AuthContext';
 import apiClient from '../services/api';
 
+/**
+ * ========================================
+ * BOOKS PAGE - Manajemen & Pembelian Buku
+ * ========================================
+ * 
+ * FUNGSI UTAMA:
+ * - Manager: CRUD (Create, Read, Update, Delete) buku dengan gambar, harga, stok, deskripsi
+ * - Pelanggan/Kasir: Lihat daftar buku, filter kategori, lihat detail, tambah ke keranjang, checkout
+ * 
+ * FITUR UTAMA:
+ * ✅ Tampilan Grid Responsive - Kartu buku dengan gambar dan info singkat
+ * ✅ Filter Kategori - Tombol kategori untuk filter buku per kategori
+ * ✅ Modal Detail - Melihat informasi lengkap buku (gambar besar, deskripsi full)
+ * ✅ Shopping Cart - Tambah multiple buku dengan quantity management
+ * ✅ Floating Cart Button - Tombol cart di sudut kanan bawah untuk checkout
+ * ✅ CRUD Buku (Manager Only) - Edit gambar, deskripsi, harga, stok; Hapus buku
+ * 
+ * STRUKTUR STATE:
+ * - books: Array semua buku dari API
+ * - categories: Array semua kategori untuk filter
+ * - cartItems: Array item yang ditambahkan ke keranjang
+ * - selectedCategoryId: ID kategori yang dipilih (null = semua buku)
+ * - showDetailModal: Kontrol modal detail buku
+ * - showCartModal: Kontrol modal keranjang belanja
+ * - formData: State untuk form edit/tambah buku
+ * 
+ * ALUR PEMESANAN (Pelanggan):
+ * 1. Pilih kategori → Filter buku
+ * 2. Klik "Detail" → Lihat informasi lengkap
+ * 3. Klik "Pesan" di detail → Tambah ke keranjang
+ * 4. Button 🛒 muncul → Klik untuk view keranjang
+ * 5. Ubah quantity, lihat total → Klik "Checkout & Buat Pesanan"
+ * 
+ * ALUR MANAJEMEN BUKU (Manager):
+ * 1. Klik "Edit" → Modal form muncul
+ * 2. Ubah data (title, author, kategori, harga, stok, gambar, deskripsi)
+ * 3. Klik "Perbarui" → Data tersimpan ke database
+ * 4. Klik "Hapus" → Konfirmasi → Buku dihapus
+ * 
+ * ======================================== */
+
 export const BooksPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  
+  // ========================================
+  // STATE MANAGEMENT
+  // ========================================
+  // Data dari API
   const [books, setBooks] = useState([]);
   const [categories, setCategories] = useState([]);
+  
+  // UI State
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [showModal, setShowModal] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [selectedCategoryId, setSelectedCategoryId] = useState(null); // null = semua buku
-  const [showCartModal, setShowCartModal] = useState(false);
-  const [showDetailModal, setShowDetailModal] = useState(false);
-  const [selectedBook, setSelectedBook] = useState(null);
-  const [cartItems, setCartItems] = useState([]); // Array of { book_id, title, author, price, quantity, stock }
+  
+  // Modal Controls
+  const [showModal, setShowModal] = useState(false);        // Form Edit/Tambah Buku
+  const [showCartModal, setShowCartModal] = useState(false); // Keranjang Belanja
+  const [showDetailModal, setShowDetailModal] = useState(false); // Detail Buku
+  
+  // Data for Modal
+  const [editingId, setEditingId] = useState(null);       // ID buku yang sedang diedit (null = menambah baru)
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null); // Filter kategori (null = semua buku)
+  const [selectedBook, setSelectedBook] = useState(null); // Buku yang dipilih untuk detail
+  
+  // Shopping Cart
+  const [cartItems, setCartItems] = useState([]); // Array of { book_id, title, author, price, image_url, quantity, stock }
+  
+  // Form Data untuk Edit/Tambah
   const [formData, setFormData] = useState({
     title: '',
     author: '',
@@ -31,7 +87,7 @@ export const BooksPage = () => {
   });
 
   // ========================================
-  // Load data buku dan kategori
+  // LOAD DATA BUKU DAN KATEGORI
   // ========================================
   useEffect(() => {
     loadBooks();
@@ -62,8 +118,13 @@ export const BooksPage = () => {
   // ========================================
   // Tambah/Edit buku
   // ========================================
+  // CRUD HANDLERS - MANAGER FUNCTIONS
+  // ========================================
+  // Membuka modal form untuk tambah buku baru atau edit buku existing
+  // @param book - null untuk tambah baru, atau object buku untuk edit
   const handleShowModal = (book = null) => {
     if (book) {
+      // EDIT MODE: Load data buku yang sudah ada ke form
       setEditingId(book.id);
       setFormData({
         title: book.title,
@@ -75,24 +136,127 @@ export const BooksPage = () => {
         description: book.description || '',
       });
     } else {
+      // ADD MODE: Reset form ke state kosong
       setEditingId(null);
       setFormData({ title: '', author: '', price: '', stock: '', category_id: '', image_url: '', description: '' });
     }
     setShowModal(true);
   };
 
+  // ========================================
+  // COMPRESS IMAGE - KURANGI UKURAN FILE
+  // ========================================
+  // Kompres gambar dengan menurunkan resolusi dan quality
+  // Gunakan Canvas untuk resize dan convert ke JPEG dengan kualitas 70%
+  // @param file - File gambar yang dipilih
+  // @returns Promise dengan dataUrl hasil kompresi
+  const compressImage = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onload = (e) => {
+        const img = new Image();
+        
+        img.onload = () => {
+          // Tentukan max width untuk gambar (misal 1200px)
+          const MAX_WIDTH = 1200;
+          let width = img.width;
+          let height = img.height;
+          
+          // Jika gambar lebih besar dari MAX_WIDTH, resize proportional
+          if (width > MAX_WIDTH) {
+            height = Math.round((height * MAX_WIDTH) / width);
+            width = MAX_WIDTH;
+          }
+          
+          // Buat canvas dan draw gambar yang sudah di-resize
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          // Convert ke JPEG dengan quality 70% (lebih kecil dari PNG tapi tetap bagus)
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+          resolve(compressedDataUrl);
+        };
+        
+        img.onerror = () => {
+          reject(new Error('Gagal memuat gambar'));
+        };
+        
+        img.src = e.target.result;
+      };
+      
+      reader.onerror = () => {
+        reject(new Error('Gagal membaca file'));
+      };
+      
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // ========================================
+  // HANDLE IMAGE UPLOAD - KONVERSI FILE KE BASE64
+  // ========================================
+  // Mengonversi file gambar yang dipilih menjadi base64 data URL dengan kompresi otomatis
+  // - Validasi format dan ukuran file
+  // - Compress image untuk mengurangi ukuran
+  // - Convert ke base64 untuk menyimpan di database
+  // @param e - File input event
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validasi tipe file
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setError('Format file tidak didukung. Gunakan JPG, PNG, WebP, atau GIF');
+      setTimeout(() => setError(''), 3000);
+      return;
+    }
+
+    // Validasi ukuran file (max 10MB sebelum kompresi, untuk keperluan)
+    const MAX_SIZE = 10 * 1024 * 1024; // 10MB in bytes
+    if (file.size > MAX_SIZE) {
+      setError('Ukuran file terlalu besar. Maksimal 10MB');
+      setTimeout(() => setError(''), 3000);
+      return;
+    }
+
+    // Kompresi gambar sebelum convert ke base64
+    setSuccess('Memproses gambar...');
+    compressImage(file)
+      .then((compressedDataUrl) => {
+        // Estimate ukuran base64 (base64 ~33% lebih besar dari binary)
+        const estimatedSize = Math.round((compressedDataUrl.length * 3) / 4 / 1024); // KB
+        
+        setFormData({ ...formData, image_url: compressedDataUrl });
+        setSuccess(`✓ Gambar berhasil dimuat (${estimatedSize}KB)`);
+        setTimeout(() => setSuccess(''), 2000);
+      })
+      .catch((err) => {
+        setError(err.message || 'Gagal memproses gambar');
+        setTimeout(() => setError(''), 3000);
+      });
+  };
+
+  // Submit form untuk TAMBAH atau EDIT buku
+  // Jika editingId ada: gunakan PUT (update), jika tidak: gunakan POST (create)
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       if (editingId) {
+        // UPDATE existing buku
         await apiClient.put(`/books/${editingId}`, formData);
         setSuccess('Buku berhasil diperbarui');
       } else {
+        // CREATE buku baru
         await apiClient.post('/books', formData);
         setSuccess('Buku berhasil ditambahkan');
       }
       setShowModal(false);
-      loadBooks();
+      loadBooks(); // Refresh data dari API
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       setError(err.response?.data?.message || 'Gagal menyimpan buku');
@@ -100,8 +264,10 @@ export const BooksPage = () => {
   };
 
   // ========================================
-  // Hapus buku
+  // HAPUS BUKU - MANAGER FUNCTION
   // ========================================
+  // Menghapus buku dari database dengan konfirmasi
+  // @param id - ID buku yang akan dihapus
   const handleDelete = async (id) => {
     if (!window.confirm('Apakah Anda yakin ingin menghapus buku ini?')) return;
     try {
@@ -120,21 +286,26 @@ export const BooksPage = () => {
   };
 
   // ========================================
-  // Handler untuk detail buku
+  // DETAIL BUKU HANDLER
   // ========================================
+  // Menampilkan modal dengan informasi lengkap buku
+  // Modal ini menampilkan gambar besar, deskripsi full, dan tombol pesan
   const handleShowDetail = (book) => {
     setSelectedBook(book);
     setShowDetailModal(true);
   };
 
   // ========================================
-  // Handler untuk shopping cart
+  // SHOPPING CART HANDLERS - PELANGGAN/KASIR
   // ========================================
+  // Menambahkan buku ke keranjang belanja
+  // - Jika buku sudah ada di cart: increment quantity (max = stok tersedia)
+  // - Jika buku baru: tambahkan ke array cartItems
   const handleAddToCart = (book) => {
     const existingItem = cartItems.find(item => item.book_id === book.id);
     
     if (existingItem) {
-      // Jika buku sudah ada di cart, tambah quantity
+      // Jika buku sudah ada di cart, tambah quantity (tidak melebihi stok)
       if (existingItem.quantity < book.stock) {
         setCartItems(cartItems.map(item =>
           item.book_id === book.id 
@@ -146,7 +317,7 @@ export const BooksPage = () => {
         setError(`Stok ${book.title} hanya tersedia ${book.stock} unit`);
       }
     } else {
-      // Tambahkan buku baru ke cart
+      // Tambahkan buku baru ke cart dengan quantity = 1
       setCartItems([...cartItems, {
         book_id: book.id,
         title: book.title,
@@ -161,10 +332,13 @@ export const BooksPage = () => {
     setTimeout(() => setSuccess(''), 2000);
   };
 
+  // Menghapus item dari keranjang belanja
   const handleRemoveFromCart = (book_id) => {
     setCartItems(cartItems.filter(item => item.book_id !== book_id));
   };
 
+  // Mengubah quantity item di keranjang
+  // Validasi: quantity tidak boleh 0, tidak boleh melebihi stok
   const handleUpdateQuantity = (book_id, newQuantity) => {
     const item = cartItems.find(item => item.book_id === book_id);
     if (item && newQuantity > 0 && newQuantity <= item.stock) {
@@ -176,6 +350,9 @@ export const BooksPage = () => {
     }
   };
 
+  // SUBMIT ORDER - Membuat pesanan ke API
+  // Mengubah cartItems menjadi format order dan mengirim ke backend
+  // Setelah sukses: tutup modal, kosongkan cart, tampilkan order ID
   const handleSubmitOrder = async () => {
     if (cartItems.length === 0) {
       setError('Keranjang masih kosong');
@@ -183,6 +360,7 @@ export const BooksPage = () => {
     }
 
     try {
+      // Format data untuk API: hanya kirm book_id dan quantity
       const orderData = {
         items: cartItems.map(item => ({
           book_id: item.book_id,
@@ -190,29 +368,43 @@ export const BooksPage = () => {
         }))
       };
 
+      // Kirim pesanan ke API
       const response = await apiClient.post('/orders', orderData);
       setSuccess(`Pesanan berhasil dibuat! Order ID: ${response.data.id}`);
       setShowCartModal(false);
-      setCartItems([]);
+      setCartItems([]); // Kosongkan keranjang setelah checkout
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       setError(err.response?.data?.message || 'Gagal membuat pesanan');
     }
   };
 
+  // Menghitung total harga keranjang = SUM(harga * quantity)
   const calculateTotal = () => {
     return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
   };
 
-  // Filter buku berdasarkan kategori yang dipilih
+  // Filter buku berdasarkan kategori yang dipilih (null = tampilkan semua)
   const displayedBooks = selectedCategoryId 
     ? books.filter((book) => book.category_id === selectedCategoryId)
     : books;
 
   if (loading) return <LoadingSpinner />;
 
+  // ========================================
+  // RENDER UI
+  // ========================================
+  // Struktur Halaman:
+  // 1. Header - Title dan back button
+  // 2. Manager Button - "Tambah Buku Baru" (hanya manager)
+  // 3. Category Filter - Tombol kategori untuk filter (Row responsive)
+  // 4. Books Grid - Kartu buku dalam grid responsive (4 kolom desktop, 3 tablet, 2 mobile, 1 hp)
+  // 5. 4x Modal - Detail, Cart, Form, Detail Modal
+  // 6. Floating Button - Cart button di sudut kanan bawah (jika ada item)
+
   return (
     <Layout title="📚 Daftar Buku" subtitle="Kelola data buku toko Anda">
+      {/* Alert Messages - Error dan Success */}
       {error && <ErrorAlert message={error} onClose={() => setError('')} />}
       {success && <SuccessAlert message={success} onClose={() => setSuccess('')} />}
 
@@ -223,7 +415,7 @@ export const BooksPage = () => {
         </Col>
       </Row>
 
-      {/* Manager Add Button */}
+      {/* Manager Button - Tambah Buku Baru */}
       {user?.role === 'manager' && (
         <div className="mb-4">
           <Button variant="success" onClick={() => handleShowModal()}>
@@ -662,23 +854,42 @@ export const BooksPage = () => {
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>URL Gambar Buku</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="https://contoh.com/gambar-buku.jpg"
-                value={formData.image_url}
-                onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-              />
+              <Form.Label>Gambar Buku</Form.Label>
+              
+              {/* File Upload */}
+              <Form.Group className="mb-3">
+                <Form.Label className="text-muted" style={{ fontSize: '0.9rem' }}>Pilih Foto dari File</Form.Label>
+                <Form.Control
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleImageUpload(e)}
+                />
+                <small className="text-muted d-block mt-2">
+                  Format: JPG, PNG, WebP, GIF (Max 10MB) • Gambar otomatis di-kompresi untuk performa lebih baik
+                </small>
+              </Form.Group>
+
+              {/* URL Input */}
+              <Form.Group className="mb-3">
+                <Form.Label className="text-muted" style={{ fontSize: '0.9rem' }}>atau Paste URL Gambar</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="https://contoh.com/gambar-buku.jpg"
+                  value={formData.image_url}
+                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                />
+              </Form.Group>
+
+              {/* Preview */}
               {formData.image_url && (
-                <div className="mt-2">
-                  <small className="text-muted">Preview:</small>
+                <div className="mt-3 p-2" style={{ backgroundColor: '#f8f9fa', borderRadius: '4px' }}>
+                  <small className="text-muted d-block mb-2">✓ Preview Gambar:</small>
                   <div style={{
-                    marginTop: '10px',
                     width: '100%',
                     height: '150px',
                     overflow: 'hidden',
                     borderRadius: '4px',
-                    backgroundColor: '#f0f0f0',
+                    backgroundColor: '#e9ecef',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center'
@@ -691,7 +902,10 @@ export const BooksPage = () => {
                         maxHeight: '100%',
                         objectFit: 'contain'
                       }}
-                      onError={(e) => e.target.style.display = 'none'}
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.parentElement.innerHTML = '<span style="color: #6c757d; font-size: 0.9rem;">Gagal memuat gambar</span>';
+                      }}
                     />
                   </div>
                 </div>

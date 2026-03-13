@@ -16,7 +16,7 @@ export const Header = () => {
     <Navbar bg="dark" expand="lg" className="mb-4" sticky="top">
       <Container>
         <Navbar.Brand href="/" className="fw-bold">
-          📚 Toko Buku
+          📚 AING BOOK STORE
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
